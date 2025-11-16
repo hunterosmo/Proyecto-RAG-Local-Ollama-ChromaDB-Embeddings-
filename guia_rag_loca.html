@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guía RAG Local – Proyecto D:\RAG_LOCAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --accent-strong: #4ade80;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-soft: #1f2937;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.7);
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background:
+        radial-gradient(circle at top, #0b1120 0, #020617 55%),
+        radial-gradient(circle at bottom, #0f172a 0, #020617 60%);
+      color: var(--text-main);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 32px auto 40px;
+      padding: 0 16px;
+    }
+
+    header {
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.75);
+      color: var(--accent-strong);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(74, 222, 128, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 10px 0 4px;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .header-meta {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-meta span {
+      padding: 2px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    section {
+      margin-top: 16px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #020617 0, #020617 60%);
+      border-radius: 22px;
+      border: 1px solid rgba(31, 41, 55, 0.85);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.16), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 6px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .muted {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    ul {
+      margin: 6px 0 6px 18px;
+      padding-left: 0;
+      font-size: 14px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+        Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 2px 4px;
+      border-radius: 5px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    pre {
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.98);
+      color: #e5e7eb;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      overflow-x: auto;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+        Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+      text-align: left;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.95);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(15, 23, 42, 0.65);
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .pill-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        margin-top: 20px;
+      }
+      h1 {
+        font-size: 22px;
+      }
+      .card {
+        padding: 15px 14px 16px;
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="badge">
+        <span>🧠 RAG Local</span>
+        <span>Guía del Proyecto (Rutas C:\ o D:\)</span>
+      </div>
+      <h1>Guía RAG Local – Ollama + ChromaDB + Documentos</h1>
+      <p class="subtitle">
+        Documentación general del proyecto RAG local: conceptos, requisitos, instalación,
+        estructura de carpetas y flujo de uso en Windows.
+      </p>
+      <div class="header-meta">
+        <span>RAG simple + router inteligente</span>
+        <span>Ollama · ChromaDB · SentenceTransformers</span>
+        <span>Documentos locales (PDF/Office/TXT/MD)</span>
+      </div>
+    </header>
+
+    <!-- Aviso sobre disco -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Nota inicial importante</span>
+        <h2>Antes de empezar: ¿en qué disco voy a instalar el proyecto?</h2>
+        <p>
+          En esta guía se usa como ejemplo la ruta <strong>D:\RAG_LOCAL</strong>, es decir,
+          un <strong>disco diferente al C:</strong>.  
+        </p>
+        <p>
+          Esto es útil porque:
+        </p>
+        <ul>
+          <li>No llenas el disco C: donde está Windows.</li>
+          <li>Puedes tener un disco dedicado a proyectos, datos o laboratorio.</li>
+          <li>Es más fácil formatear o reinstalar Windows sin tocar tu carpeta de RAG.</li>
+        </ul>
+        <p>
+          Pero si solo tienes el disco C: o prefieres usar C:, también es válido.  
+          En cada paso te mostraré:
+        </p>
+        <ul>
+          <li>Opción con <strong>D:\RAG_LOCAL</strong></li>
+          <li>Opción con <strong>C:\RAG_LOCAL</strong></li>
+        </ul>
+        <p class="muted">
+          Regla de oro: donde veas <code>D:\RAG_LOCAL</code>, puedes cambiarlo por
+          <code>C:\RAG_LOCAL</code> o por la letra de disco que tú quieras
+          (por ejemplo, <code>E:\RAG_LOCAL</code>), siempre y cuando seas consistente.
+        </p>
+      </div>
+    </section>
+
+    <!-- 1. Conceptos básicos -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 1 · Conceptos básicos</span>
+        <h2>1. ¿Qué es un RAG? (Explicación sencilla)</h2>
+        <p>
+          <strong>RAG</strong> significa <strong>Retrieval-Augmented Generation</strong>,
+          o <em>Generación aumentada por recuperación</em>.
+        </p>
+        <p>En palabras simples:</p>
+        <ul>
+          <li>Tienes una <strong>IA que genera texto</strong> (phi4, llama, mistral…).</li>
+          <li>Tienes una <strong>base de conocimiento</strong> con tus documentos.</li>
+          <li>Cuando preguntas algo, la IA primero <strong>busca en tus documentos</strong> y luego responde usando esa información.</li>
+        </ul>
+
+        <h3>¿Qué hace tu RAG en este proyecto?</h3>
+        <p>
+          Tu sistema RAG local está pensado para trabajar con tus archivos en
+          <code>RUTA_DISCO\RAG_LOCAL\docs</code> (puede ser C:\ o D:\):
+        </p>
+        <ul>
+          <li>PDF</li>
+          <li>Word (<code>.docx</code>)</li>
+          <li>PowerPoint (<code>.pptx</code>)</li>
+          <li>Excel (<code>.xlsx</code>)</li>
+          <li>Archivos de texto (<code>.txt</code>, <code>.md</code>)</li>
+        </ul>
+        <p>
+          Cada vez que haces una pregunta, el sistema:
+        </p>
+        <ol>
+          <li>Convierte tu pregunta a un embedding (vector de números).</li>
+          <li>Busca los fragmentos más parecidos en tus documentos.</li>
+          <li>Construye un contexto con esos fragmentos.</li>
+          <li>Envía ese contexto al modelo de IA (phi4, llama3.1, mistral).</li>
+          <li>Te responde en español usando tus apuntes y archivos como base.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 2. Embeddings -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 2 · Embeddings</span>
+        <h2>2. ¿Qué es un embedding?</h2>
+        <p>
+          Un <strong>embedding</strong> es una representación de texto convertida
+          en una lista de números (un vector). Es la forma en que el sistema “entiende”
+          el significado de una frase.
+        </p>
+        <p>Lo importante no es ver los números, sino lo que permiten hacer:</p>
+        <ul>
+          <li>Frases con significado parecido tienen embeddings similares.</li>
+          <li>El sistema puede buscar “por significado” y no solo por palabras exactas.</li>
+        </ul>
+        <p>Ejemplo de idea:</p>
+        <ul>
+          <li>“cadena de custodia en informática forense”</li>
+          <li>“proceso para mantener la integridad de la evidencia digital”</li>
+        </ul>
+        <p>
+          Aunque usan palabras diferentes, sus embeddings están cerca, entonces
+          tu RAG las considera relacionadas.
+        </p>
+        <p class="muted">
+          En tu proyecto, los embeddings se generan con un modelo tipo
+          <strong>all-MiniLM-L6-v2</strong> (rápido y eficiente para uso local).
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. Para qué sirve este RAG -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 3 · Uso del sistema</span>
+        <h2>3. ¿Para qué tipo de cosas sirve este RAG?</h2>
+        <p>Este RAG local está pensado para tareas como:</p>
+        <ul>
+          <li>
+            <strong>Estudio personal</strong>  
+            Preguntar a tus apuntes para preparar exámenes, resúmenes y trabajos.
+          </li>
+          <li>
+            <strong>Ciberseguridad y forense</strong>  
+            Consultar documentación técnica, manuales, guías de hardening, normas, etc.
+          </li>
+          <li>
+            <strong>Trabajo profesional</strong>  
+            Leer políticas, procedimientos, informes y sacar resúmenes o explicaciones.
+          </li>
+          <li>
+            <strong>Apuntes centralizados</strong>  
+            Tener PDFs, Word, presentaciones y hojas de cálculo como una sola “base de conocimiento”.
+          </li>
+          <li>
+            <strong>IA privada</strong>  
+            Todo corre en tu PC, sin subir tus documentos a la nube.
+          </li>
+        </ul>
+
+        <h3>Tipos de preguntas que maneja el sistema</h3>
+        <ul>
+          <li>Preguntas de conversación general (small talk).</li>
+          <li>Preguntas de código / programación.</li>
+          <li>Preguntas que quieren usar <strong>tus documentos</strong>.</li>
+        </ul>
+
+        <p class="muted">
+          El router inteligente decide cuándo usar un modelo de chat general,
+          cuándo usar un modelo especializado en código y cuándo activar
+          el motor RAG con tus documentos.
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. Requerimientos -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 4 · Requerimientos</span>
+        <h2>4. ¿Para qué tipo de equipo está pensado este RAG?</h2>
+        <p>
+          El proyecto está diseñado para funcionar en varios niveles de hardware.
+          Cuanto más potente el equipo, más grandes y complejos pueden ser los modelos.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nivel de equipo</th>
+                <th>CPU</th>
+                <th>RAM</th>
+                <th>Uso recomendado</th>
+                <th>Modelos sugeridos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mínimo</strong></td>
+                <td>4 núcleos</td>
+                <td>8 GB</td>
+                <td>Documentos pequeños, estudio ligero, pruebas básicas.</td>
+                <td><code>llama3.1:8b</code>, <code>mistral</code> pequeño, <code>phi4</code> cuantizado.</td>
+              </tr>
+              <tr>
+                <td><strong>Medio (ideal)</strong></td>
+                <td>6–8 núcleos</td>
+                <td>16 GB</td>
+                <td>Uso diario, PDFs medianos, múltiples documentos.</td>
+                <td><code>phi4:14b-q4_K_M</code>, <code>llama3.1:8b</code>, <code>mistral</code> para código.</td>
+              </tr>
+              <tr>
+                <td><strong>Alto rendimiento</strong></td>
+                <td>12–16 núcleos</td>
+                <td>32–64 GB</td>
+                <td>Documentos grandes, colecciones voluminosas, modelos enormes.</td>
+                <td>Modelos más grandes (phi/llama 70B, Mixtral, etc., si la GPU lo permite).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          La idea es:
+        </p>
+        <ul>
+          <li>En equipos modestos → usar modelos pequeños y rápidos.</li>
+          <li>En equipos medios → usar <strong>phi4 14B</strong> para RAG, llama3.1 para chat y mistral para código.</li>
+          <li>En equipos potentes → puedes experimentar con modelos más pesados.</li>
+        </ul>
+
+        <p class="muted">
+          Tu configuración está pensada para un equipo de nivel medio: un buen balance
+          entre rendimiento y calidad de respuesta.
+        </p>
+      </div>
+    </section>
+
+    <!-- 5. Instalación -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 5 · Instalación del entorno</span>
+        <h2>5. Instalación paso a paso (sin entrar al código)</h2>
+
+        <h3>5.1. Instalar Python 3.11.9 para evitar problemas tiene que ser esta version pero eres libre de usar la que se acople a ti</h3>
+        <p>
+          Descarga Python desde la página oficial:
+        </p>
+        <p><a href="https://www.python.org/downloads/windows/" target="_blank" style="color: var(--accent-strong); text-decoration:none;">https://www.python.org/downloads/windows/</a></p>
+        <p>Durante la instalación:</p>
+        <ul>
+          <li>Marca ✔ <strong>Add Python to PATH</strong>.</li>
+          <li>Luego pulsa en <strong>Install Now</strong>.</li>
+        </ul>
+
+        <h3>5.2. Crear la carpeta del proyecto (C: o D:)</h3>
+        <p>
+          Abre PowerShell y elige una de estas dos opciones:
+        </p>
+
+        <p><strong>Opción A – Usar el disco D: (recomendado si lo tienes):</strong></p>
+        <pre>
+D:
+mkdir D:\RAG_LOCAL
+mkdir D:\RAG_LOCAL\docs
+mkdir D:\RAG_LOCAL\chroma_db
+mkdir D:\RAG_LOCAL\bat
+cd D:\RAG_LOCAL
+        </pre>
+
+        <p><strong>Opción B – Usar el disco C: (si no tienes D:):</strong></p>
+        <pre>
+C:
+mkdir C:\RAG_LOCAL
+mkdir C:\RAG_LOCAL\docs
+mkdir C:\RAG_LOCAL\chroma_db
+mkdir C:\RAG_LOCAL\bat
+cd C:\RAG_LOCAL
+        </pre>
+
+        <p class="muted">
+          Si quieres usar otra letra (por ejemplo E:), simplemente cambia la letra en
+          todos los comandos (E:\RAG_LOCAL, etc.).  
+          Lo importante es que seas consistente en toda la guía.
+        </p>
+
+        <h3>5.3. ¿Por qué usamos un entorno virtual de Python?</h3>
+        <p>
+          El proyecto utiliza un <strong>entorno virtual</strong> llamado <code>.venv</code>.
+          Esto se hace por varias razones:
+        </p>
+        <ul>
+          <li><strong>Separar librerías del sistema</strong>: lo que instales aquí no afecta a otros proyectos ni al Python global.</li>
+          <li><strong>Evitar conflictos de versiones</strong>: puedes tener versiones concretas de <code>chromadb</code>, <code>sentence-transformers</code>, etc.</li>
+          <li><strong>Reproducibilidad</strong>: si subes el proyecto a GitHub, otra persona puede recrear el entorno con las mismas dependencias.</li>
+        </ul>
+        <p>
+          Piensa en <code>.venv</code> como una “burbuja” donde vive el Python
+          de tu proyecto, con sus librerías específicas.
+        </p>
+
+        <h3>5.4. Crear y activar el entorno virtual</h3>
+        <p>Estando dentro de tu carpeta <code>RAG_LOCAL</code> (en C: o D:):</p>
+        <pre>
+python -m venv .venv
+        </pre>
+
+        <p>Para activarlo en PowerShell:</p>
+
+        <p><strong>Si estás en D:\RAG_LOCAL:</strong></p>
+        <pre>
+D:
+cd D:\RAG_LOCAL
+.\.venv\Scripts\activate
+        </pre>
+
+        <p><strong>Si estás en C:\RAG_LOCAL:</strong></p>
+        <pre>
+C:
+cd C:\RAG_LOCAL
+.\.venv\Scripts\activate
+        </pre>
+
+        <p>
+          Si aparece un error diciendo que los scripts están deshabilitados,
+          ejecuta (solo una vez):
+        </p>
+        <pre>
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+        </pre>
+
+        <p>Luego vuelve a activar el entorno con el comando correspondiente (C: o D:).</p>
+
+        <!-- 5.5 ACTUALIZADA -->
+        <h3>5.5. Instalar librerías de Python (ChromaDB + Embeddings + LangChain)</h3>
+
+        <p>
+          Con el entorno virtual activado (debes ver <code>(.venv)</code> en tu terminal),
+          instala todas las librerías necesarias para que tu RAG funcione correctamente.
+        </p>
+
+        <p>
+          En Windows, el comando del intérprete puede variar según cómo se instaló Python. <strong>a mi solo me funcionó correctamente</strong> usando <code>py -m pip </code>,
+          pero aquí se dejan las tres opciones más comunes:
+        </p>
+
+        <pre>
+# Opción 1 (la que funcionó en este proyecto)
+py -m pip install --upgrade pip
+
+# Opción 2 (muchos equipos con "python" en PATH)
+python -m pip install --upgrade pip
+
+# Opción 3 (algunos sistemas / WSL / Linux)
+python3 -m pip install --upgrade pip
+        </pre>
+
+        <p>
+          A partir de aquí, en los ejemplos se usará <code>py -m pip</code>, pero
+          si en tu equipo funciona mejor <code>python -m</code> o <code>python3 -m</code>,
+          simplemente reemplaza <code>py</code> por el comando que corresponda.
+        </p>
+
+        <p><strong>🔹 1. Instalar Sentence Transformers (Embeddings)</strong></p>
+        <p>
+          Este paquete permite crear embeddings usando el modelo
+          <code>all-MiniLM-L6-v2</code>, que es el que utiliza tu RAG.
+        </p>
+
+        <pre>
+py -m pip install sentence-transformers
+        </pre>
+
+        <p><strong>🔹 2. Instalar ChromaDB (Base vectorial + Cliente)</strong></p>
+        <p>
+          ChromaDB es donde se almacenan los chunks de texto y embeddings.
+          Es fundamental para consultas tipo RAG.
+        </p>
+
+        <pre>
+py -m pip install chromadb
+        </pre>
+
+        <p><strong>🔹 3. Instalar cliente HTTP para Ollama</strong></p>
+        <p>
+          Ollama se comunica vía HTTP usando la librería
+          <code>requests</code>. Tu archivo <code>rag_core.py</code> depende
+          de esta librería para enviar prompts y recibir respuestas del modelo local.
+        </p>
+
+        <pre>
+py -m pip install requests
+        </pre>
+
+        <p><strong>🔹 4. Instalar LangChain + Text Splitters</strong></p>
+        <p>
+          LangChain permite:
+        </p>
+        <ul>
+          <li>Cargar PDF, Word, Excel y más.</li>
+          <li>Trocear documentos con <strong>text splitters</strong>.</li>
+          <li>Preparar el flujo de ingesta para <code>ingest.py</code> y <code>re_ingest.py</code>.</li>
+        </ul>
+
+        <pre>
+py -m pip install langchain langchain-community langchain-text-splitters
+        </pre>
+
+        <p><strong>🔹 5. Instalar lectores de archivos (PDF, Word, Excel, PowerPoint)</strong></p>
+        <p>Estas librerías permiten que tu RAG lea tus documentos reales.</p>
+
+        <pre>
+py -m pip install pypdf python-docx openpyxl python-pptx
+        </pre>
+
+        <p>
+          Con estas librerías podrás indexar completamente:
+        </p>
+        <ul>
+          <li>📄 Archivos PDF (<code>.pdf</code>)</li>
+          <li>📝 Documentos Word (<code>.docx</code>)</li>
+          <li>📊 Excel (<code>.xlsx</code>)</li>
+          <li>📽 PowerPoint (<code>.pptx</code>)</li>
+          <li>📃 Archivos Markdown y <code>.txt</code></li>
+        </ul>
+
+        <p>
+          Ahora tu entorno tiene todo lo necesario para ejecutar correctamente
+          <strong>ingest.py</strong>, <strong>re_ingest.py</strong>,
+          <strong>rag_core.py</strong> y tu RAG completo.
+        </p>
+
+        <h3>5.6. Instalar Ollama y los modelos</h3>
+        <p>Instala Ollama desde su página oficial y luego, en una terminal, ejecuta:</p>
+        <pre>
+ollama pull phi4:14b-q4_K_M
+ollama pull mistral
+ollama pull llama3.1:8b
+        </pre>
+
+        <p class="muted">
+          Estos son los modelos que usarás por defecto:
+          <strong>phi4</strong> para RAG sobre documentos, <strong>mistral</strong> para
+          programación y <strong>llama3.1</strong> para chat general.
+        </p>
+      </div>
+    </section>
+
+    <!-- 6. Estructura del proyecto -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 6 · Estructura del proyecto</span>
+        <h2>6. Estructura de carpetas y archivos</h2>
+        <p>
+          El proyecto se organiza en <code>RUTA_DISCO\RAG_LOCAL</code> con la siguiente estructura
+          general (usando D: como ejemplo):
+        </p>
+        <pre>
+D:\RAG_LOCAL\
+│
+├── docs\               ← Aquí van tus documentos (PDF, DOCX, PPTX, XLSX, TXT, MD)
+├── chroma_db\          ← Base vectorial (la genera el sistema)
+├── bat\                ← Contiene el archivo iniciar_rag.bat (si lo usas)
+├── .venv\              ← Entorno virtual de Python
+│
+├── config.py           ← Configuración: rutas, modelos, parámetros RAG
+├── ingest.py           ← Ingesta de documentos (lee docs/ y llena chroma_db/)
+├── re_ingest.py        ← Limpia la colección y vuelve a ingerir todo
+├── clean_collection.py ← Borra la colección 'docs' en Chroma
+├── count_collection.py ← Muestra cuántos chunks hay en la colección
+├── rag_core.py         ← Núcleo completo del RAG con filtros
+├── rag_query.py        ← RAG simple basado en phi4 y Chroma
+├── smart_query.py      ← Router inteligente (chat / código / documentos)
+├── rag_menu.py         ← Menú principal para manejar todo
+├── ui_console.py       ← Modo consola RAG directo (parte esencial del proyecto)
+└── iniciar_rag.ps1     ← Script PowerShell para arrancar el menú rápido
+        </pre>
+
+        <p>
+          Si usas <strong>C:</strong> en lugar de D:, la estructura será igual, pero
+          con:
+        </p>
+        <pre>
+C:\RAG_LOCAL\...
+        </pre>
+
+        <p>
+          Los códigos completos de estos archivos viven en la carpeta del proyecto
+          (por ejemplo, en tu repositorio bajo <code>src/</code> o directamente
+          en <code>RAG_LOCAL</code>).  
+          Esta guía se centra en explicar su función, sin duplicar el código aquí.
+        </p>
+      </div>
+    </section>
+
+    <!-- 7. Acceso directo -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 7 · Acceso directo</span>
+        <h2>7. Acceso directo al menú principal</h2>
+        <p>
+          Para no tener que abrir PowerShell y escribir comandos cada vez, puedes
+          crear un acceso directo en el escritorio que ejecute este comando
+          (ajusta la ruta según uses C: o D:):, asi tambien debes crear un acceso directo en tu escritorio si quieres abrir directamente tu menu desde la carpeta bat rag_menu.py
+        </p>
+
+        <p><strong>Si usas D:\RAG_LOCAL (como en tu proyecto):</strong></p>
+        <pre>
+powershell.exe -ExecutionPolicy Bypass -NoExit -File "D:\RAG_LOCAL\iniciar_rag.ps1"
+        </pre>
+
+        <p><strong>Si usas C:\RAG_LOCAL:</strong></p>
+        <pre>
+powershell.exe -ExecutionPolicy Bypass -NoExit -File "C:\RAG_LOCAL\iniciar_rag.ps1"
+        </pre>
+
+        <p>Flujo típico:</p>
+        <ol>
+          <li>Haces doble clic en el acceso directo.</li>
+          <li>Se ejecuta <code>iniciar_rag.ps1</code>.</li>
+          <li>Ese script activa el entorno virtual <code>.venv</code>.</li>
+          <li>Se ejecuta <code>rag_menu.py</code>.</li>
+          <li>Aparece el menú del RAG en la consola.</li>
+        </ol>
+
+        <p>En el menú verás opciones como:</p>
+        <ul>
+          <li>1) Re-ingestar documentos</li>
+          <li>2) Limpiar colección</li>
+          <li>3) Contar documentos/chunks</li>
+          <li>4) Modo chat (múltiples preguntas)</li>
+          <li>5) Pregunta única rápida</li>
+          <li>6) Salir</li>
+          <li>7) Abrir <code>ui_console.py</code> (consola avanzada, habla directamente con el RAG)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. Flujo de trabajo -->
+    <section class="card">
+      <div class="card-inner">
+        <span class="pill-title">Sección 8 · Flujo de trabajo</span>
+        <h2>8. Flujo típico de uso del RAG</h2>
+
+        <h3>1) Cargar o actualizar documentos</h3>
+        <ul>
+          <li>Copia tus PDFs, DOCX, PPTX, XLSX, TXT y MD dentro de <code>RUTA_DISCO\RAG_LOCAL\docs</code>.</li>
+        </ul>
+
+        <h3>2) Re-ingestar la colección</h3>
+        <ul>
+          <li>Abre el menú del RAG (con el acceso directo).</li>
+          <li>Elige la opción <strong>1) Re-ingestar documentos</strong>.</li>
+          <li>El sistema limpia la colección y la vuelve a construir con tus archivos.</li>
+        </ul>
+
+        <h3>3) Hacer preguntas</h3>
+        <ul>
+          <li>Para estudiar: usa el menú en <strong>4) Modo chat</strong>.</li>
+          <li>Para una única consulta: opción <strong>5) Pregunta única rápida</strong>.</li>
+          <li>Para hablar <em>directamente</em> con el motor RAG:
+            usa la <strong>opción 7</strong> del menú (<code>ui_console.py</code> – consola avanzada).
+          </li>
+        </ul>
+
+        <h3>4) Ejemplos de uso conceptual</h3>
+        <ul>
+          <li>“Según mis apuntes de forense, ¿qué es la cadena de custodia?”</li>
+          <li>“Resúmeme el documento de hardening de Linux que está en la carpeta seguridad.”</li>
+          <li>“Explícame con tus propias palabras el capítulo de redes del PDF de Julián Camargo.”</li>
+        </ul>
+
+        <div class="chips-row">
+          <span class="chip">IA local y privada</span>
+          <span class="chip">Documentos como base de conocimiento</span>
+          <span class="chip">Router inteligente</span>
+          <span class="chip">RAG especializado para estudio y trabajo</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
